@@ -1,0 +1,16 @@
+
+gunicorn -  para rodar o projeto, servidor feito para rodar aplicações python
+django-stdimage - facilita trabalhar com imagens
+dj-static -  carrega arquivos estaticos
+dj-database-url - passa informações do host para usar o banco de dados
+whitenoise - é para apresentar os arquivos static css, javascript, imagens modo de produção
+django-bootstrap4   é um framework front end integrado com django
+
+--banco--
+#mysql
+PyMySQL - drive de conexão do python com mysql
+
+#postgresql
+psycopg2-binary - serve para trabalhar com banco de dados postgresql
+
+

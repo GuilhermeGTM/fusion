@@ -1,0 +1,274 @@
+                    ##Configurações que sempre vamos fazer###
+#settings
+**
+ALLOWED_HOSTS = ['*']
+
+_________________________________________________________
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    'core',
+]
+
+_________________________________________________________
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+
+_________________________________________________________
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'fusion',
+        'USER': 'postgres',
+        'PASSWORD': '12345678',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+
+_________________________________________________________
+LANGUAGE_CODE = 'pt-br'
+
+TIME_ZONE = 'America/Sao_Paulo'
+
+_________________________________________________________
+
+STATIC_URL = 'static/'
+MEDIA_URL = 'midia/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'midia')
+
+**
+#urls do projeto
+
+**
+from django.contrib import admin
+from django.urls import path, include
+
+from django.conf.urls.static import static
+from django.conf import settings
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('core.urls'))
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+**
+
+# criar pastas templates e static dentro da aplicação core no exemplo
+
+                    ## criando views  usando Class-based views##
+
+**
+from django.views.generic import TemplateView
+
+
+class IndexView(TemplateView):
+    template_name = 'index.html'
+
+**
+
+                ##criando urls###
+
+**
+from django.urls import path
+
+from .views import IndexView
+
+urlpatterns = [
+    path('', IndexView.as_view(), name='index'),
+]
+
+**
+
+
+                    ##Criando models ###
+
+auto_now_add=True quando eu crio um objeto
+auto_now=True  toda vez que é modificado o valor é atualizado
+
+**
+import uuid
+from django.db import models
+
+from stdimage.models import StdImageField
+
+
+# gera um hexadecimal apartir do nome de entrada
+def get_file_path(_instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return filename
+
+
+class Base(models.Model):
+    criados = models.DateField('Criação', auto_now_add=True)
+    modificado = models.DateField('Atualização', auto_now=True)
+    ativo = models.BooleanField('Ativo?', default=True)
+
+    class Meta:
+        abstract = True
+
+
+# gera um box com seleção
+class Servico(Base):
+    ICONE_CHOICES = (
+        ('lni-cog', 'Engrenagem'),
+        ('lni-stats-up', 'Gráfico'),
+        ('lni-users', 'Usúarios'),
+        ('lni-layers', 'Design'),
+        ('lni-mobile', 'Mobile'),
+        ('lni-rocket', 'Foguete'),
+    )
+    servico = models.CharField('Serviço', max_length=100)
+    descricao = models.TextField('Descrição', max_length=200)
+    icone = models.CharField('Icone', max_length=12, choices=ICONE_CHOICES)
+
+    class Meta:
+        verbose_name = 'Serviço'
+        verbose_name_plural = 'Serviços'
+
+    def __str__(self):
+        return self.servico
+
+
+class Cargo(Base):
+    cargo = models.CharField('Cargo', max_length=100)
+
+    class Meta:
+        verbose_name = 'Cargo'
+        verbose_name_plural = 'Cargos'
+
+    def __str__(self):
+        return self.cargo
+
+
+# sempre que for usado uma foreignkey temos que usar o on_delete
+class Funcionario(Base):
+    nome = models.CharField('Nome', max_length=100)
+    cargo = models.ForeignKey(
+        'core.Cargo', verbose_name='Cargo', on_delete=models.CASCADE)
+    bio = models.TextField('Bio', max_length=200)
+    imagem = StdImageField('Imagem', upload_to=get_file_path, variations={
+                           'thumb': {'width': 480, 'height': 480,
+                                     'crop': True}})
+    facebook = models.CharField('Facebook', max_length=100, default='#')
+    twitter = models.CharField('Twitter', max_length=100, default='#')
+    instagram = models.CharField('Instagram', max_length=100, default='#')
+
+    class Meta:
+        verbose_name = 'Funcionário'
+        verbose_name_plural = 'Funcionários'
+
+    def __str__(self):
+        return self.nome
+
+**
+
+apos criar views fazenos o migrate
+
+---> python manage.py makemigrations
+--->  python manage.py migrate
+
+
+                    ## mostrando dados do banco no  template configurando a views##
+usando o TemplateView
+**
+from django.views.generic import TemplateView
+
+from .models import Servico, Funcionario
+
+
+class IndexView(TemplateView):
+    template_name = 'index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(*kwargs)
+        context['servicos'] = Servico.objects.order_by('?').all()
+        context['funcionarios'] = Funcionario.objects.order_by('?').all()
+        return context
+
+**
+esse order_by é para ordenar aleatório
+agora só falta configurar no template
+
+
+                #### Configurando para fazer deploy ###
+dentro do sistema no wsgi.py configuramos
+**
+"""
+WSGI config for fusion project.
+
+It exposes the WSGI callable as a module-level variable named ``application``.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/5.1/howto/deployment/wsgi/
+"""
+
+import os
+
+from django.core.wsgi import get_wsgi_application
+# cling para arquivos static
+# mediacling para arquivos de midia, upload
+from dj_static import Cling, MediaCling
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fusion.settings')
+
+application = Cling(MediaCling(get_wsgi_application()))
+
+**
+
+dentro do setting configuramos um import
+**
+import dj_database_url
+**
+
+e no banco deixamos assim
+**
+# banco produção
+DATABASES = {
+    'default': dj_database_url()
+**
+
+usamos local
+
+**
+# banco local
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'fusion',
+        'USER': 'postgres',
+        'PASSWORD': '12345678',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+**
+
+criamos um arquivo chamado runtime.txt dentro dele colocamos a versão do python
+no caso
+Python-3.12.3
+criamos outro aquivo chamado
+web: gunicorn fusion.wsgi --log-file -
