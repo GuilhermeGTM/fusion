@@ -2,7 +2,7 @@
 [![NPM](https://img.shields.io/npm/l/react)](https://github.com/GuilhermeGTM/ProjetoFilmes/blob/main/LICENSE) 
 
 # Sobre o projeto
-Nesse projeto foi trabalhado, class-based views como metodo get_context_data, usamos tbm FormView para o formulario usando metodos como def form_valid e def form_invalid
+Nesse projeto foi trabalhado, class-based views como metodo get_context_data, usamos tbm FormView para o formulario usando metodos como def form_valid e def form_invalid, foi feitos testes usando coverage.
   
 
 ## Layout web
@@ -26,6 +26,8 @@ Nesse projeto foi trabalhado, class-based views como metodo get_context_data, us
 
 ![Web 10](https://github.com/GuilhermeGTM/fusion/blob/master/demo/10.png)
 
+![Web 11](https://github.com/GuilhermeGTM/fusion/blob/master/demo/teste1.png)
+
 # Tecnologias utilizadas
 
 ## Back end
@@ -42,6 +44,7 @@ Nesse projeto foi trabalhado, class-based views como metodo get_context_data, us
 
 ## DB
 - Postgresql
+- SQLite3
 
 ## Implantação em produção
 https://guilhermegtm.pythonanywhere.com/
@@ -56,6 +59,8 @@ ativando venv
 baixando as dependencias
 --->python -m pip install -r requirements.txt
 --->python manage.py migrate
+criar um superuser
+--->python manage.py createsuperuser
 executando o projeto
 -->python manage.py runserver
 ```
