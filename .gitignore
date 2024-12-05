@@ -5,3 +5,7 @@ __pycache__
 .venv
 
 template/*
+
+htmlcov/*
+
+db.sqlite3
