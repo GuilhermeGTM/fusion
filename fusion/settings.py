@@ -147,6 +147,23 @@ MEDIA_URL = '/midia/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'midia')
 
+# Recursos Extras de Segurança do Django
+SECURE_HSTS_SECONDS = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
+X_FRAME_OPTIONS = 'DENY'
+
+
+"""
+Ativar somente qnd for para produção, executa somente https
+"""
+# SECURE_SSL_REDIRECT = True
+
+
 # Email de teste console
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
