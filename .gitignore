@@ -9,3 +9,5 @@ template/*
 htmlcov/*
 
 db.sqlite3
+
+.env
